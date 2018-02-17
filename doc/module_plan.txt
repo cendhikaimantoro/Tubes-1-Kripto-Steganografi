@@ -1,0 +1,12 @@
+- File Processor
+	- imageToMatrix(filename) : Matriks
+	- matrixToImage(Matriks, filename) : void
+	- fileToByte(filename) : Array of byte
+	- byteToFile(array of byte) : filename
+- Vigenere
+	- encrypt(Array of byte, key) : Array of byte
+	- decrypt(Array of byte, key) : Array of byte
+- BPCS
+	- insertMessage(matriks, array of byte, key) : matriks
+	- extractMessage(stegano matriks, key) : array of byte
+- Interface
