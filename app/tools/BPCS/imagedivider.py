@@ -18,8 +18,8 @@ def divide(img):
     height1, width1 = bordered.shape[:2]
     print("%d and %d" % (width1, height1))
     
-    p = int(width/8)
-    q = int(height/8)
+    p = int(width1/8)
+    q = int(height1/8)
     
     crop_img = [[0 for a in range(p)] for b in range(q)]
     for i in range(q):
@@ -31,10 +31,20 @@ def divide(img):
             #cv2.waitKey(0)
             #cv2.destroyAllWindows()
             
+            #CONTOH MANIPULASI GAMBARNYA (per pixel per warna) DI BAWAH SINI! (bikin fungsi baru aja kalau nanti ada yg mau bikin)
+            for k in range(8):
+                for l in range(8):
+                    #crop_img.item buat ngambil nilai pixel, k,l koordinat, 0 untuk B, 1 untuk G, 2 untuk R. itemset buat set nilai pixel
+                    crop_img[i][j].itemset((k,l,0),int(crop_img[i][j].item(k,l,0)/2))
+                    crop_img[i][j].itemset((k,l,1),int(crop_img[i][j].item(k,l,1)/2))
+                    crop_img[i][j].itemset((k,l,2),int(crop_img[i][j].item(k,l,2)/2))
+                    #crop_img berisi image 8x8
             
-            
-    #crop_img berisi image 8x8
-    return crop_img
+    
+    cv2.imshow("image",bordered)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    return bordered
     
 
 image = cv2.imread("../../../file/input/medium_image/test.jpeg")
