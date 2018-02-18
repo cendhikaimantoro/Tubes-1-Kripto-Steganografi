@@ -1,8 +1,12 @@
+from django.core.files import File
 from django.utils.encoding import smart_str
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
+from .tools.File_Processor.messageProcessor import loadMessage, parseMessage
+from .tools.Vigenere.vigenere import encrypt, decrypt
 from .forms import InsertionForm, ExtractionForm
+import os 
 
 def index(request):
   response = ""
@@ -11,13 +15,21 @@ def index(request):
   return HttpResponse(response)
 
 def download(request, io, filetype, filename):
-  path_to_file = 'file/input/'+io+'/'+filetype+'/'+filename
-  response = HttpResponse()
-  response['mimetype']='application/force-download'
-  response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
-  response['X-Sendfile'] = smart_str(path_to_file)
+  path_to_file = 'file/'+io+'/'+filetype+'/'+filename  
+  with open(path_to_file, 'rb') as f:
+    myfile = File(f)
+    response = HttpResponse(myfile, content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=' + smart_str(filename)
   return response
 
+def image(request, io, filetype, filename):
+  path_to_file = 'file/'+io+'/'+filetype+'/'+filename  
+  ext = filename.split('.')[-1]
+  with open(path_to_file, 'rb') as f:
+    myfile = File(f)
+    response = HttpResponse(myfile, content_type='image/'+ext)
+    response['Content-Disposition'] = 'attachment; filename=' + smart_str(filename)
+  return response
 
 def insertion(request):
   if request.method == 'GET':
@@ -30,29 +42,35 @@ def insertion(request):
     print(request.FILES)
 
     if form.is_valid():
+      key = request.POST.get('key', '-')
+      treshold = request.POST.get('treshold', '-')
       medium_name = request.FILES['medium_image'].name
+      message_name = request.FILES['message'].name
+      
       with open('file/input/medium_image/'+medium_name, 'wb+') as destination:
         for chunk in request.FILES['medium_image'].chunks():
           destination.write(chunk)
-
-      message_name = request.FILES['message'].name
+      
       with open('file/input/message/'+message_name, 'wb+') as destination:
         for chunk in request.FILES['message'] .chunks():
           destination.write(chunk)
 
+      chiperAoB = encrypt(loadMessage('file/input/message/'+message_name), key) #array of byte yang akan dimasukkan
+      print (chiperAoB)
       #Build stegano image here
+      
 
       template = loader.get_template('app/html/insertion_result.html')
       context = {
           'medium_name': medium_name,
-          'medium_src': 'file/input/medium_image/'+medium_name,
+          'medium_src': 'image/input/medium_image/'+medium_name,
           'medium_download': 'download/input/medium_image/'+medium_name,
           'message_name': message_name,
           'message_download': 'download/input/message/'+message_name,
           #TODO benerin ini setelah berhasil build stegano image
           'stegano_name': medium_name,
           'stegano_psnr': '100',
-          'stegano_src': 'file/input/medium_image/'+medium_name,
+          'stegano_src': 'image/input/medium_image/'+medium_name,
           'stegano_download': 'download/input/medium_image/'+medium_name,
         }
       return HttpResponse(template.render(context, request))
@@ -68,21 +86,29 @@ def extraction(request):
     form = ExtractionForm(request.POST, request.FILES)
 
     if form.is_valid():
+      key = request.POST.get('key', '-')
+      treshold = request.POST.get('treshold', '-')
       stegano_name = request.FILES['stegano_image'].name
+      
       with open('file/input/stegano_image/'+stegano_name, 'wb+') as destination:
         for chunk in request.FILES['stegano_image'].chunks():
           destination.write(chunk)
 
-    #Extract message here
+      #Extract message here
+      chiperAoB = encrypt(b'stub.txt/ntar message ekstraksi di-assign ke sini', key)  # ntar array of byte yg berhasil diekstrak diassign ke sini
+      filename, filecontent = parseMessage(decrypt(chiperAoB,key))
+      with open('file/output/message/'+filename, 'wb+') as destination:
+        destination.write(filecontent)
+
+      message_name = filename
 
       template = loader.get_template('app/html/extraction_result.html')
       context = {
         'stegano_name': stegano_name,
-        'stegano_src': 'input/stegano_image/'+smart_str(stegano_name),
+        'stegano_src': 'image/input/stegano_image/'+smart_str(stegano_name),
         'stegano_download': 'download/input/stegano_image/'+smart_str(stegano_name),
-        #TODO benerin ini setelah berhasil extract message
-        'message_name': smart_str(stegano_name),
-        'message_download': 'download/input/message/'+smart_str(stegano_name),
+        'message_name': message_name,
+        'message_download': 'download/output/message/'+smart_str(message_name),
       }
       return HttpResponse(template.render(context, request))
   return HttpResponse("error")

@@ -7,4 +7,5 @@ urlpatterns = [
     path('insertion', views.insertion, name='index'),
     path('extraction', views.extraction, name='index'),
     path('download/<str:io>/<str:filetype>/<str:filename>', views.download, name='index'),
+    path('image/<str:io>/<str:filetype>/<str:filename>', views.image, name='index'),
 ]
