@@ -10,3 +10,15 @@ def complexity8x8(binary8x8):
 					score += 1
 	return score
 	
+def conjugate(binary):
+	ret = []
+	for i in range(len(binary)):
+		ret.append([])
+		for j in range(len(binary[i])):
+			if (binary[i][j] == (i+j)%2):
+				xor = 0
+			else:
+				xor = 1
+
+			ret[i].append(xor)
+	return ret
