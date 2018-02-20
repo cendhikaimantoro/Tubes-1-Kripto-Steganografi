@@ -42,24 +42,35 @@ def noiseLikeArray(img):
             #cv2.waitKey(0)
             #cv2.destroyAllWindows()
             
+            
+            thr = 0.3 #nanti ganti sama masukan user
+            plane_img = crop_img[i][j].copy()
             #CONTOH MANIPULASI GAMBARNYA (per pixel per warna) DI BAWAH SINI! (bikin fungsi baru aja kalau nanti ada yg mau bikin)
-            for k in range(8):
-                for l in range(8):
-                    #crop_img.item buat ngambil nilai pixel, k,l koordinat, 0 untuk B, 1 untuk G, 2 untuk R. itemset buat set nilai pixel
-                    #crop_img[i][j].itemset((k,l,0),int(crop_img[i][j].item(k,l,0)*2)%256)
-                    #crop_img[i][j].itemset((k,l,1),int(crop_img[i][j].item(k,l,1)*2)%256)
-                    #crop_img[i][j].itemset((k,l,2),int(crop_img[i][j].item(k,l,2)*2)%256)
-                    #crop_img berisi image 8x8
-                    thr = 0.3 #nanti ganti sama masukan user
-                    plane_img = crop_img[i][j].copy()
-                    for col in range(3):
-                        for pl in range(8):
-                            bit = int(math.pow(2,pl))
-                            plane_img.itemset((k,l,col),int(plane_img.item(k,l,col) & bit))
-                            plane = BitPlane(plane_img,col,pl)
-                            if isNoiseLike(plane,thr):
-                                plane1 = BitPlane(crop_img[i][j],col,pl)
-                                noiselike.append(plane1)
+            
+            for pl in range(8):
+                bit = int(math.pow(2,pl))
+                for col in range(3):
+                    for k in range(8):
+                        for l in range(8):
+                            #crop_img.item buat ngambil nilai pixel, k,l koordinat, 0 untuk B, 1 untuk G, 2 untuk R. itemset buat set nilai pixel
+                            #crop_img[i][j].itemset((k,l,0),int(crop_img[i][j].item(k,l,0)*2)%256)
+                            #crop_img[i][j].itemset((k,l,1),int(crop_img[i][j].item(k,l,1)*2)%256)
+                            #crop_img[i][j].itemset((k,l,2),int(crop_img[i][j].item(k,l,2)*2)%256)
+                            #crop_img berisi image 8x8
+                            #plane_img gambarnya udh menyesuaikan bitplane dan warnanya
+                            for z in range(3):
+                                if col==z:
+                                    plane_img.itemset((k,l,col),int(plane_img.item(k,l,col) & bit))
+                                else:
+                                    plane_img.itemset((k,l,z),0)
+                    cv2.imshow("image",plane_img)
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
+                    plane = BitPlane(plane_img,col,pl)
+                    if isNoiseLike(plane,thr):
+                        noiselike.append(plane)
+                        
+            print("panjang array: %d" % noiselike.__len__())
     
     cv2.imshow("image",bordered)
     cv2.waitKey(0)
@@ -68,4 +79,4 @@ def noiseLikeArray(img):
     
 
 image = cv2.imread("../../../file/input/medium_image/test.jpeg")
-cropped_image = noiseLikeArray(image)    
+cropped_image = noiseLikeArray(image)
