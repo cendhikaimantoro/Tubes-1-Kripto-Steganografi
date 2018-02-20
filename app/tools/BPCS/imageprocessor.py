@@ -9,6 +9,12 @@ class BitPlane:
         self.color = color
         self.plane = plane
         
+    def getPlane(self):
+        bit = int(math.pow(2,plane))
+        plane_img = img.copy()
+        plane_img.itemset((k,l,color),int(plane_img.item(k,l,color) & bit))
+        return plane_img
+        
     
 def noiseLikeArray(img):
     height, width = img.shape[:2]
@@ -68,7 +74,8 @@ def noiseLikeArray(img):
                     cv2.destroyAllWindows()
                     plane = BitPlane(plane_img,col,pl)
                     if isNoiseLike(plane,thr):
-                        noiselike.append(plane)
+                        plane1 = BitPlane(crop_img[i][j],col,pl)
+                        noiselike.append(plane1)
                         
             print("panjang array: %d" % noiselike.__len__())
     
