@@ -1,31 +1,24 @@
 import math
 
 def addfile(path):
-        file = open(path,"r")
-        words = file.read()
+        file = open(path,"rb")
+        words = bytearray(file.read())
         paddingbit = len(words)%8
         file.close()
         if paddingbit != 0:
-                file = open(path,"a")
                 for i in range(0, 8-paddingbit):
-                        file.write("0")
-                file.close()
-
-        file = open(path,"r")
-        words = file.read()
-        paddingbit = len(words)%8
-        file.close()
+                        words.append(0)
         return words
 
 
 words = addfile("teks.txt")
-#print(words)
 
+#print(words)
 #to bit stream
 def tobits(string):
     result = []
     for c in string:
-        bits = bin(ord(c))[2:]
+        bits = bin(c)[2:] 
         bits = '00000000'[len(bits):] + bits
         result.extend([int(b) for b in bits])
     return result
@@ -47,10 +40,15 @@ def makeplanes(string):
                                 plane[i][j] = string[k]
                                 k+=1
                 planes.append(plane)
-    
         return planes
 
 planes = makeplanes(bitstream)
+
+for i in planes:
+    for j in i:
+        print (j)
+    print()
+
 
 def complexity8x8(binary8x8):
 	score = 0
@@ -71,7 +69,7 @@ def arraycomplexity(planes):
                 res.append(complexity8x8(planes[i]))
         return res
 
-arraycom = arraycomplexity(planes)
+#arraycom = arraycomplexity(planes)
 
 def arrayconjugate(complexity, param):
         res = []
@@ -82,6 +80,6 @@ def arrayconjugate(complexity, param):
                         res.append(0)
         return res
 
-arraycon = arrayconjugate(arraycom, 0.4)
+#arraycon = arrayconjugate(arraycom, 0.4)
 
-print(arraycon)
+#print(arraycon)
