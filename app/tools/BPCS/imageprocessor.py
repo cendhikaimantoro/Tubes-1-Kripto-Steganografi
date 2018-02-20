@@ -21,7 +21,7 @@ class BitPlane:
     
 def noiseLikeArray(img,treshold):
     height, width = img.shape[:2]
-    print("%d and %d" % (width, height))
+    #print("%d and %d" % (width, height))
     
     x=0
     y=0
@@ -34,7 +34,7 @@ def noiseLikeArray(img,treshold):
     bordered = cv2.copyMakeBorder(img, top=0, bottom=y, left=0, right=x, borderType=cv2.BORDER_CONSTANT, value=[0,0,0])
     
     height1, width1 = bordered.shape[:2]
-    print("%d and %d" % (width1, height1))
+    #print("%d and %d" % (width1, height1))
     
     p = int(width1/8)
     q = int(height1/8)
@@ -44,7 +44,7 @@ def noiseLikeArray(img,treshold):
     noiselike = []
     for i in range(q):
         for j in range(p):
-            print("%d and %d" % ((i+1)*8, (j+1)*8))
+            #print("%d and %d" % ((i+1)*8, (j+1)*8))
             crop_img[i][j] = bordered[i*8:(i+1)*8, j*8:(j+1)*8]
             #KALAU MAU NGETES GAMBARNYA KYK GIMANA BUKA AJA UNCOMMENT LINES DI BAWAH
             #cv2.imshow("image",crop_img[i][j])
@@ -79,7 +79,7 @@ def noiseLikeArray(img,treshold):
                     if isNoiseLike(plane,thr):
                         noiselike.append(plane)
                         
-            print("panjang array: %d" % noiselike.__len__())
+            #print("panjang array: %d" % noiselike.__len__())
     
     #cv2.imshow("image",bordered)
     cv2.waitKey(0)
@@ -88,4 +88,4 @@ def noiseLikeArray(img,treshold):
     
 
 image = cv2.imread("../../../file/input/medium_image/test.jpeg")
-cropped_image = noiseLikeArray(image, 0.3)
+#cropped_image = noiseLikeArray(image, 0.3)

@@ -1,5 +1,5 @@
 import math
-
+'''
 def addfile(path):
         file = open(path,"rb")
         words = bytearray(file.read())
@@ -41,8 +41,39 @@ def makeplanes(string):
                                 k+=1
                 planes.append(plane)
         return planes
+'''
+def byteArrToPlanes(byteArr):
+    copy = bytearray(byteArr)
+    remainder = len(copy)%8
+    if remainder != 0:
+        for i in range(8-remainder):
+            copy.append(0)
 
-planes = makeplanes(bitstream)
+    bitArr = []
+    for byte in copy:
+        bits = bin(byte)[2:] 
+        bits = '00000000'[len(bits):] + bits
+        bitArr.extend([int(b) for b in bits])  
+
+    numofplane = len(bitArr)//64
+    if len(bitArr)%64 != 0 :
+            numofplane += 1
+    planes = []
+    
+    k = 0
+    for i in range(numofplane):
+        plane = [[0 for i in range(8)] for j in range(8)]
+        for i in range(8):
+            for j in range(8):
+                plane[i][j] = bitArr[k]
+                k+=1
+        planes.append(plane)    
+
+    return planes
+'''
+
+print(tobits(b'lolololololololol'))
+planes = makeplanes(tobits(b'lolololololololol'))
 
 for i in planes:
     for j in i:
@@ -83,3 +114,4 @@ def arrayconjugate(complexity, param):
 #arraycon = arrayconjugate(arraycom, 0.4)
 
 #print(arraycon)
+'''

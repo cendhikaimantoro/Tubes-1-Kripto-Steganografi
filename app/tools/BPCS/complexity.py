@@ -8,7 +8,7 @@ def complexity8x8(binary8x8):
 			if j < 7:
 				if binary8x8[i][j] != binary8x8[i][j+1]:
 					score += 1
-	return score
+	return score/112
 	
 def conjugate(binary):
 	ret = []
