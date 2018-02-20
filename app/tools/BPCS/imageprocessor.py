@@ -44,12 +44,12 @@ def noiseLikeArray(img):
             
             
             thr = 0.3 #nanti ganti sama masukan user
-            plane_img = crop_img[i][j].copy()
-            #CONTOH MANIPULASI GAMBARNYA (per pixel per warna) DI BAWAH SINI! (bikin fungsi baru aja kalau nanti ada yg mau bikin)
             
+            #CONTOH MANIPULASI GAMBARNYA (per pixel per warna) DI BAWAH SINI! (bikin fungsi baru aja kalau nanti ada yg mau bikin)
             for pl in range(8):
                 bit = int(math.pow(2,pl))
                 for col in range(3):
+                    plane_img = crop_img[i][j].copy()
                     for k in range(8):
                         for l in range(8):
                             #crop_img.item buat ngambil nilai pixel, k,l koordinat, 0 untuk B, 1 untuk G, 2 untuk R. itemset buat set nilai pixel
