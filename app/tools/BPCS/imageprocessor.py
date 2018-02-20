@@ -1,7 +1,16 @@
 import numpy as np
 import cv2
+import math
+from bitplane import isNoiseLike
 
-def divide(img):
+class BitPlane:
+    def __init__ (self, img, color, plane):
+        self.img = img
+        self.color = color
+        self.plane = plane
+        
+    
+def noiseLikeArray(img):
     height, width = img.shape[:2]
     print("%d and %d" % (width, height))
     
@@ -22,6 +31,8 @@ def divide(img):
     q = int(height1/8)
     
     crop_img = [[0 for a in range(p)] for b in range(q)]
+    
+    noiselike = []
     for i in range(q):
         for j in range(p):
             print("%d and %d" % ((i+1)*8, (j+1)*8))
@@ -35,17 +46,26 @@ def divide(img):
             for k in range(8):
                 for l in range(8):
                     #crop_img.item buat ngambil nilai pixel, k,l koordinat, 0 untuk B, 1 untuk G, 2 untuk R. itemset buat set nilai pixel
-                    crop_img[i][j].itemset((k,l,0),int(crop_img[i][j].item(k,l,0)/2))
-                    crop_img[i][j].itemset((k,l,1),int(crop_img[i][j].item(k,l,1)/2))
-                    crop_img[i][j].itemset((k,l,2),int(crop_img[i][j].item(k,l,2)/2))
+                    #crop_img[i][j].itemset((k,l,0),int(crop_img[i][j].item(k,l,0)*2)%256)
+                    #crop_img[i][j].itemset((k,l,1),int(crop_img[i][j].item(k,l,1)*2)%256)
+                    #crop_img[i][j].itemset((k,l,2),int(crop_img[i][j].item(k,l,2)*2)%256)
                     #crop_img berisi image 8x8
-            
+                    thr = 0.3 #nanti ganti sama masukan user
+                    plane_img = crop_img[i][j].copy()
+                    for col in range(3):
+                        for pl in range(8):
+                            bit = int(math.pow(2,pl))
+                            plane_img.itemset((k,l,col),int(plane_img.item(k,l,col) & bit))
+                            plane = BitPlane(plane_img,col,pl)
+                            if isNoiseLike(plane,thr):
+                                plane1 = BitPlane(crop_img[i][j],col,pl)
+                                noiselike.append(plane1)
     
     cv2.imshow("image",bordered)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    return bordered
+    return noiselike
     
 
 image = cv2.imread("../../../file/input/medium_image/test.jpeg")
-cropped_image = divide(image)    
+cropped_image = noiseLikeArray(image)    
