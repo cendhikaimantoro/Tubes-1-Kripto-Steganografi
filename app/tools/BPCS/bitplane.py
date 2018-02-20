@@ -13,7 +13,7 @@ def countChanges(bitplane):
 
 def isNoiseLike(bitplane, threshold):
     k=countChanges(bitplane)
-    if k>threshold*112:
+    if k/112>threshold:
         return True
     else:
         return False
