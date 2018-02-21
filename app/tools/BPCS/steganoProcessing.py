@@ -133,18 +133,14 @@ def insertMessage(imagedir, messageAoB, key, treshold):
 				nonInformativeDataPlane = temporaryDataPlane + nonInformativeDataPlane
 
 				#lengthplane
-				plane = [[0 for i in range(8)] for i in range(8)]
+				
 
 				length = len(messageAoB)
+				plane = intToBit8x8(length)
 
-				arr = []
-				for i in range(64):
-					arr.append(length>>(63-i)&1)
-				plane = []
-				for i in range(8):
-					plane.append([])
-					for j in range(8):
-						plane[i].append(arr[8*i+j])
+				for i in range(len(plane)):
+					print(plane[i], '     >>>>>     ', conjugate(plane)[i])
+				print()
 
 				plane[0][0] = isRootConjugated
 				lengthPlane = plane #
@@ -199,6 +195,10 @@ def extractMessage(imgdir, key, treshold):
 
 		lengthPlane2 = conjugate(getData8x8(steganoimage, (nonInformativePlane[shuffledOrder[0]])))
 
+		for i in range(len(lengthPlane2)):
+			print(lengthPlane2[i], '     >>>>>     ', conjugate(lengthPlane2)[i])
+		print()
+
 		isRootConjugated = lengthPlane2[0][0]
 		lengthPlane2[0][0] = 0
 		length = bit8x8ToInt(lengthPlane2)
@@ -251,8 +251,8 @@ def psnr(imgdir1, imgdir2):
 	for i in range(M):
 		for j in range (N):
 			for k in range(3):
-				val1 = img1.item(i,j,k)
-				val2 = img2.item(i,j,k)
+				val1 = img1.item(j,i,k)
+				val2 = img2.item(j,i,k)
 				rms += (val1-val2)*(val1-val2)
 	rms = math.sqrt(rms/M/N/3)
 

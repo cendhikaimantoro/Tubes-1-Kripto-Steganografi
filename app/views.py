@@ -3,8 +3,10 @@ from django.utils.encoding import smart_str
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
+import cv2
 from .tools.File_Processor.messageProcessor import loadMessage, parseMessage
 from .tools.Vigenere.vigenere import encrypt, decrypt
+from .tools.BPCS.steganoProcessing import insertMessage, extractMessage, psnr
 from .forms import InsertionForm, ExtractionForm
 import os 
 
@@ -43,7 +45,7 @@ def insertion(request):
 
     if form.is_valid():
       key = request.POST.get('key', '-')
-      treshold = request.POST.get('treshold', '-')
+      treshold = float(request.POST.get('treshold', '-'))/100
       medium_name = request.FILES['medium_image'].name
       message_name = request.FILES['message'].name
       
@@ -55,25 +57,33 @@ def insertion(request):
         for chunk in request.FILES['message'] .chunks():
           destination.write(chunk)
 
-      chiperAoB = encrypt(loadMessage('file/input/message/'+message_name), key) #array of byte yang akan dimasukkan
-      print (chiperAoB)
-      #Build stegano image here
-      
 
-      template = loader.get_template('app/html/insertion_result.html')
-      context = {
-          'medium_name': medium_name,
-          'medium_src': 'image/input/medium_image/'+medium_name,
-          'medium_download': 'download/input/medium_image/'+medium_name,
-          'message_name': message_name,
-          'message_download': 'download/input/message/'+message_name,
-          #TODO benerin ini setelah berhasil build stegano image
-          'stegano_name': medium_name,
-          'stegano_psnr': '100',
-          'stegano_src': 'image/input/medium_image/'+medium_name,
-          'stegano_download': 'download/input/medium_image/'+medium_name,
+
+      chiperAoB = encrypt(loadMessage('file/input/message/'+message_name), key) #array of byte yang akan dimasukkan
+      #Build stegano image here
+      status, payload, messagesize, image = insertMessage('file/input/medium_image/'+medium_name, chiperAoB, key, treshold)
+      if status == 1 :
+        cv2.imwrite('file/output/stegano_image/stegano_'+medium_name, image)
+        psnrScore = psnr('file/input/medium_image/'+medium_name, 'file/output/stegano_image/stegano_'+medium_name)
+        template = loader.get_template('app/html/insertion_result.html')
+        context = {
+            'medium_name': medium_name,
+            'payload': payload,
+            'medium_src': 'image/input/medium_image/'+medium_name,
+            'medium_download': 'download/input/medium_image/'+medium_name,
+            'message_name': message_name,
+            'messagesize': messagesize,
+            'message_download': 'download/input/message/'+message_name,
+            #TODO benerin ini setelah berhasil build stegano image
+            'stegano_name': 'stegano_'+medium_name,
+            'stegano_psnr': str(psnrScore),
+            'stegano_src': 'image/output/stegano_image/stegano_'+medium_name,
+            'stegano_download': 'download/output/stegano_image/stegano_'+medium_name,
         }
-      return HttpResponse(template.render(context, request))
+        return HttpResponse(template.render(context, request))
+      else :
+        return HttpResponse("Message too big. Payload : " + str(payload) + " Bytes. Message : " + str(messagesize) + " Bytes.")
+      
   return HttpResponse("error")
 
 def extraction(request):
@@ -87,7 +97,7 @@ def extraction(request):
 
     if form.is_valid():
       key = request.POST.get('key', '-')
-      treshold = request.POST.get('treshold', '-')
+      treshold = float(request.POST.get('treshold', '-'))/100
       stegano_name = request.FILES['stegano_image'].name
       
       with open('file/input/stegano_image/'+stegano_name, 'wb+') as destination:
@@ -95,7 +105,7 @@ def extraction(request):
           destination.write(chunk)
 
       #Extract message here
-      chiperAoB = encrypt(b'stub.txt/ntar message ekstraksi di-assign ke sini', key)  # ntar array of byte yg berhasil diekstrak diassign ke sini
+      chiperAoB = extractMessage('file/input/stegano_image/'+stegano_name, key, treshold)  # ntar array of byte yg berhasil diekstrak diassign ke sini
       filename, filecontent = parseMessage(decrypt(chiperAoB,key))
       with open('file/output/message/'+filename, 'wb+') as destination:
         destination.write(filecontent)
