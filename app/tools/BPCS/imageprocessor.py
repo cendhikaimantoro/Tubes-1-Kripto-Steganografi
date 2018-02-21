@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import math
-from bitplane import isNoiseLike
+from .bitplane import isNoiseLike
 
 class BitPlane:
     def __init__ (self, x, y, img, color, plane):

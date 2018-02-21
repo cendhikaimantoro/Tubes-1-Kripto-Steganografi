@@ -1,9 +1,9 @@
 import random
 import math
 import cv2
-from complexity import complexity8x8, conjugate
-from imageprocessor import noiseLikeArray
-from messagebitplane import byteArrToPlanes
+from .complexity import complexity8x8, conjugate
+from .imageprocessor import noiseLikeArray
+from .messagebitplane import byteArrToPlanes
 
 
 def insertplane(img, plane, data):
@@ -84,7 +84,7 @@ def insertMessage(imagedir, messageAoB, key, treshold):
 		nReservedPlane += n
 	allocation[0] -= nReservedPlane
 	sizeDataPlane = allocation[0]
-
+	print(len(nonInformativePlane))
 	payload = sizeDataPlane*8
 
 	dataSize = len(dataPlane)
@@ -173,15 +173,16 @@ def insertMessage(imagedir, messageAoB, key, treshold):
 		payload = payload
 		messagesize = len(messageAoB)
 		image = img
-
+		print(len(noiseLikeArray(image, treshold)[1]))
 		return status, payload, messagesize, image
 
 			
 #########################################################################################################################
-def extractMessage(imgdir, key, treshold)
-		steganoimage = cv2.imread(imagedir)
+def extractMessage(imgdir, key, treshold):
+		steganoimage = cv2.imread(imgdir)
 		steganoImage, nonInformativePlane = noiseLikeArray(steganoimage, treshold)
 		sizeBitPlane = len(nonInformativePlane)
+		print(len(nonInformativePlane))
 
 		allocation = []
 		allocation.append(sizeBitPlane)
@@ -201,8 +202,10 @@ def extractMessage(imgdir, key, treshold)
 		isRootConjugated = lengthPlane2[0][0]
 		lengthPlane2[0][0] = 0
 		length = bit8x8ToInt(lengthPlane2)
+		print(lengthPlane2)
 
 		allocation[0] = (length+7)//8
+
 
 		dataPlane = []
 		for i in range(nReservedPlane+allocation[0]):
@@ -220,6 +223,7 @@ def extractMessage(imgdir, key, treshold)
 					outputBitPlane[j] = conjugate(outputBitPlane[j])
 			remainder = remainder[allocation[i]:]
 
+
 		bufferByte = outputBitPlane
 		byteArr = []
 		for i in range(length):
@@ -233,76 +237,29 @@ def extractMessage(imgdir, key, treshold)
 
 		return byteArr
 
+def psnr(imgdir1, imgdir2):
+	img1 = cv2.imread(imgdir1)
+	img2 = cv2.imread(imgdir2)
+	height1, width1 = img1.shape[:2]
+	height2, width2 = img2.shape[:2]
+
+	M = min(width1, width2)
+	N = min(height1,height2)
+
+	rms = 0
+
+	for i in range(M):
+		for j in range (N):
+			for k in range(3):
+				val1 = img1.item(i,j,k)
+				val2 = img2.item(i,j,k)
+				rms += (val1-val2)*(val1-val2)
+	rms = math.sqrt(rms/M/N/3)
+
+	ret = 20 * math.log10(256/rms)
+	return ret
 
 
 
 
-
-
-
-
-
-'''
-def extractMessage(imagedir, key, treshold):
-	#load non informative bitplane gambar
-	nonInformativePlane = []
-
-	#calculate bitplane allocation
-	sizeBitPlane = len(nonInformativePlane)
-	allocation = []
-	allocation.append(sizeBitPlane)
-	while(allocation[-1] > 1):
-		allocation.append((allocation[-1]+63)//64)
-	nReservedPlane = 1  #1 for storing data length
-	for n in allocation[1:]:
-		nReservedPlane += n
-	allocation[0] -= nReservedPlane
-
-	#getshuffleorder
-	random.seed(key)
-	shuffledOrder = random.shuffle(range(sizeBitPlane))
-
-	#get file length
-	lengthBitplane = []
-	for i in range(8):
-		lengthBitplane.append([])
-		for j in range(8):
-			plane = nonInformativePlane[shuffledOrder[0]]
-			imgX = (plane.x)*8+i
-			imgY = (plane.y)*8+j
-			rgb = plane.rgb
-			imageByte = byte(bordered.item(imgX,imgY,rgb))
-			bit = (imageByte >> (7-plane.bitlevel)) & 1
-			lengthBitplane[i].append(bit)
-	dataLength = bit8x8ToInt(lengthBitplane)
-	allocation[0] = (dataLength+7)//8
-
-	#case root not conjugated
-	conjugationStartIdx = 1
-	conjugationBitPlane = []
-	conjugationBitplane.append(getData8x8(nonInformativePlane[shuffledOrder[conjugationStartIdx]]))
-	for level in reversed(range(1, len(allocation))):
-		dataStartIdx = conjugationStartIdx+allocation[level]
-		dataBitPlane = []
-		for i in range(allocation[level-1]):
-			if(conjugationBitplane[i//64][i%64//8][i%8] == 1):
-				dataBitPlane.append(conjugate(getData8x8(nonInformativePlane[shuffledOrder[dataStartIdx+i]])))
-			elif (conjugationBitplane[i//64][i%64//8][i%8] == 0):
-				dataBitPlane.append(getData8x8(nonInformativePlane[shuffledOrder[dataStartIdx+i]]))
-
-		conjugationBitPlane = dataBitPlane
-		conjugationStartIdx = dataStartIdx
-
-	dataBitPlane = conjugationBitPlane
-	bufferLength = dataLength
-	byteMessage = []
-	idx = 0
-	while bufferLength > idx:
-		bitlist = conjugationBitPlane[idx//64][idx%64//8][idx%8]
-		out = 0
-		for bit in bitlist:
-				out = (out << 1) | bit
-			 byteMessage.append(out)
-
-	return byteMessage
-'''
+	
